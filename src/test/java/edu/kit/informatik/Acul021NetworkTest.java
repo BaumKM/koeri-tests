@@ -263,6 +263,30 @@ class Acul021NetworkTest {
         assertEquals("", small.toString(null));
 
     }
+    
+    @Test
+    public void testDoesInternalStateChange() throws ParseException {
+
+        Network network = new Network(MEDIUM_NET);
+        Network network2 = new Network(SMALL_NET);
+
+        //no overlapping nodes
+        Assertions.assertTrue(network.add(network2));
+        String netBeforeDisconnection = network.toString(ip("85.193.148.81"));
+        Assertions.assertTrue(network2.disconnect(ip("85.193.148.81"), ip("141.255.1.133")));
+        Assertions.assertEquals(netBeforeDisconnection, network.toString(ip("85.193.148.81")));
+
+        Network network3 = new Network("(116.132.83.77 1.1.1.1 2.2.2.2 (5.5.5.5 3.3.3.3))");
+
+        //overlapping nodes
+        Assertions.assertTrue(network.add(network3));
+        String netBeforeDisconnection2 = network.toString(ip("116.132.83.77"));
+        Assertions.assertTrue(network3.disconnect(ip("2.2.2.2"), ip("116.132.83.77")));
+        Assertions.assertEquals("(3.3.3.3 (5.5.5.5 (116.132.83.77 1.1.1.1)))", network3.toString(ip("3.3.3.3")));
+
+        Assertions.assertEquals(netBeforeDisconnection2, network.toString(ip("116.132.83.77")));
+
+    }
 
     private Network net(String net) {
         try {
